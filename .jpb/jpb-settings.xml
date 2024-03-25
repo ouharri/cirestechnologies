@@ -12,7 +12,7 @@
     <persistence-units>
       <persistence-unit name="Default" defaultIncludeChangeLogFile="src/main/resources/db/db.changelog-master.yaml">
         <packages>
-          <package value="com.ouharri.aftas" />
+          <package value="com.ouharri.cirestechnologies" />
         </packages>
       </persistence-unit>
     </persistence-units>

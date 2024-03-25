@@ -1,5 +1,5 @@
 server:
-  port: 8084
+  port: 9090
 
 logging:
   level:
@@ -17,6 +17,16 @@ springdoc:
       enabled: true
 
 spring:
+  servlet:
+    multipart:
+      max-file-size: 90MB
+      max-request-size: 90MB
+  batch:
+    jdbc:
+      initialize-schema: ALWAYS
+      table-prefix: BATCH_
+    job:
+      enabled: false
   application:
     name: aftas
     admin:
@@ -33,40 +43,31 @@ spring:
         enabled: false
       host: localhost
       port: 6379
+  h2:
+    console.enabled: true
+    console:
+      settings:
+        trace: false
   docker:
     compose:
-      enabled: true
+      enabled: false
       file: compose.yaml
   datasource:
-    url: ${APP_DB_URL}
+    url: jdbc:h2:mem:${APP_DB_NAME};DB_CLOSE_ON_EXIT=TRUE
     username: ${APP_DB_USER}
     password: ${APP_DB_PASS}
-    driver-class-name: org.postgresql.Driver
+    driver-class-name: org.h2.Driver
   liquibase:
     change-log: classpath:db/db.changelog-master.yaml
   jpa:
     hibernate:
-      ddl-auto: none
+      ddl-auto: create-drop
     show-sql: true
     properties:
       hibernate:
         format_sql: true
-    database: postgresql
-    open-in-view: false
-  quartz:
-    jdbc:
-      initialize-schema: always
-    job-store-type: jdbc
-    properties:
-      org:
-        quartz:
-          jobStore:
-            driverDelegateClass: org.quartz.impl.jdbcjobstore.PostgreSQLDelegate
-            isClustered: true
-          scheduler:
-            instanceId: AUTO
-          threadPool:
-            threadCount: 5
+    database: h2
+
   security:
     oauth2:
       resourceserver:
@@ -94,6 +95,6 @@ application:
   security:
     jwt:
       secret-key: ${JWT_SECRET_KEY}
-      expiration: 86400000
+      expiration: ${JWT_EXPIRATION_TIME}
       refresh-token:
-        expiration: 604800000
+        expiration: ${JWT_REFRESH_EXPIRATION_TIME}

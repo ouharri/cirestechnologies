@@ -19,7 +19,7 @@ import io.swagger.v3.oas.annotations.servers.Server;
                 contact = @Contact(
                         name = "ouharri",
                         email = "ouharri.outman+spring@gmail.com",
-                        url = "https://ouharri.ma"
+                        url = "https://github.com/ouharri"
                 ),
                 description = "OpenApi documentation for cirestechnologies Challenge API",
                 title = "cirestechnologies - ouharri",
