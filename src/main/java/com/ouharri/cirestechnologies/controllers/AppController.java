@@ -1,4 +1,4 @@
-package com.ouharri.aftas.controllers;
+package com.ouharri.cirestechnologies.controllers;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
