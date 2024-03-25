@@ -1,10 +1,10 @@
-package com.ouharri.aftas.controllers;
+package com.ouharri.cirestechnologies.controllers;
 
-import com.ouharri.aftas.exceptions.ResourceNotCreatedException;
-import com.ouharri.aftas.model.dto.App.RestPage;
-import com.ouharri.aftas.model.dto.requests._Request;
-import com.ouharri.aftas.model.dto.responses._Response;
-import com.ouharri.aftas.services.spec._Service;
+import com.ouharri.cirestechnologies.exceptions.ResourceNotCreatedException;
+import com.ouharri.cirestechnologies.model.dto.App.RestPage;
+import com.ouharri.cirestechnologies.model.dto.requests._Request;
+import com.ouharri.cirestechnologies.model.dto.responses._Response;
+import com.ouharri.cirestechnologies.services.spec._Service;
 import jakarta.validation.Valid;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
