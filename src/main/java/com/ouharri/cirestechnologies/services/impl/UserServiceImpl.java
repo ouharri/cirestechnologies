@@ -27,6 +27,9 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.modelmapper.ModelMapper;
 import org.springframework.cache.annotation.CacheConfig;
+import org.springframework.cache.annotation.CacheEvict;
+import org.springframework.cache.annotation.Cacheable;
+import org.springframework.cache.annotation.Caching;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.authentication.AnonymousAuthenticationToken;
@@ -81,6 +84,15 @@ public class UserServiceImpl extends _ServiceImp<UUID, UserRequest, UserResponse
      * @return The saved user.
      * @throws ResourceNotCreatedException If the user could not be created.
      */
+    @Caching(
+            evict = {
+                    @CacheEvict(
+                            key = "#result.id",
+                            allEntries = true,
+                            condition = "#result != null"
+                    )
+            }
+    )
     public User saveUser(User user) {
         try {
             return repository.save(user);
@@ -109,7 +121,9 @@ public class UserServiceImpl extends _ServiceImp<UUID, UserRequest, UserResponse
 
         UserDetails userDetails = (UserDetails) authentication.getPrincipal();
         User user = findByUsername(userDetails.getUsername());
-        return modelMapper.map(user, UserGeneratedResponses.class);
+        UserGeneratedResponses userResponse = modelMapper.map(user, UserGeneratedResponses.class);
+        userResponse.setRole(user.getRole());
+        return userResponse;
     }
 
     /**
@@ -118,6 +132,10 @@ public class UserServiceImpl extends _ServiceImp<UUID, UserRequest, UserResponse
      * @param count The number of users to generate.
      * @return A CompletableFuture containing the list of generated users.
      */
+    @Cacheable(
+            key = "#count",
+            sync = true
+    )
     public List<UserGeneratedResponses> generateUsers(int count) {
         int batchSize = 1000;
         int numThreads = Math.max(1, Math.min(count / batchSize, Runtime.getRuntime().availableProcessors()));
@@ -179,6 +197,10 @@ public class UserServiceImpl extends _ServiceImp<UUID, UserRequest, UserResponse
      * @return Un objet représentant le résumé de l'importation.
      */
     @Transactional
+    @Cacheable(
+            key = "#file.bytes",
+            sync = true
+    )
     public UploadSummaryResponseDTO uploadBatch(MultipartFile file) {
         try {
             List<UserResponses> users = new ObjectMapper().readValue(file.getInputStream(), new TypeReference<>() {
@@ -235,7 +257,6 @@ public class UserServiceImpl extends _ServiceImp<UUID, UserRequest, UserResponse
         }
     }
 
-
     /**
      * Changes the role of a user.
      *
@@ -255,7 +276,6 @@ public class UserServiceImpl extends _ServiceImp<UUID, UserRequest, UserResponse
             throw new ResourceNotCreatedException("User Role not updated");
         }
     }
-
 
     /**
      * Retrieves a user by email.
@@ -288,6 +308,18 @@ public class UserServiceImpl extends _ServiceImp<UUID, UserRequest, UserResponse
     public User findByUsernameOrEmail(String username) {
         return repository.findByUsernameOrEmail(username, username)
                 .orElseThrow(() -> new ResourceNotFoundException("User not found"));
+    }
+
+    /**
+     * Retrieves a user by their username.
+     *
+     * @param username The username of the user to retrieve.
+     * @return ResponseEntity containing the user's details if found, otherwise returns a 404 Not Found response.
+     */
+    @PreAuthorize("hasAuthority('ROLE_ADMIN')")
+    public UserResponses getUserByUsername(String username) {
+        return mapper.toResponse(repository.findByUsername(username)
+                .orElseThrow(() -> new ResourceNotFoundException("User not found")));
     }
 
     /**
@@ -333,18 +365,6 @@ public class UserServiceImpl extends _ServiceImp<UUID, UserRequest, UserResponse
             user.setStatus(UserStatus.OFFLINE);
             repository.save(user);
         }
-    }
-
-    /**
-     * Retrieves a user by their username.
-     *
-     * @param username The username of the user to retrieve.
-     * @return ResponseEntity containing the user's details if found, otherwise returns a 404 Not Found response.
-     */
-    @PreAuthorize("hasAuthority('ROLE_ADMIN')")
-    public UserResponses getUserByUsername(String username) {
-        return mapper.toResponse(repository.findByUsername(username)
-                .orElseThrow(() -> new ResourceNotFoundException("User not found")));
     }
 
     /**
