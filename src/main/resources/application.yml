@@ -41,8 +41,8 @@ spring:
       database: 0
       repositories:
         enabled: false
-      host: localhost
-      port: 6379
+      host: cirestechnologies-cache
+      port: ${REDIS_PORT}
   h2:
     console.enabled: true
     console:
